@@ -51,6 +51,17 @@ func main() {
 		fmt.Printf("gagal memvalidasi tipe data: %s \n", err)
 		os.Exit(0)
 	}
+
+	result, err := generateOutput(mapping)
+	if err != nil {
+		fmt.Printf("gagal membuat data: %s \n", err)
+		os.Exit(0)
+	}
+
+	if err := writeOutput(outputPath, result); err != nil {
+		fmt.Printf("gagal menulis hasil: %s \n", err)
+		os.Exit(0)
+	}
 }
 
 func printUsage() {
@@ -140,5 +151,45 @@ func validatetype(mapping map[string]string) error {
 			return errors.New("tipe data tidak didukung")
 		}
 	}
+	return nil
+}
+
+func generateOutput(mapping map[string]string) (map[string]any, error) {
+	result := make(map[string]any)
+
+	for key, dataType := range mapping {
+		result[key] = fmt.Sprintf("%s palsu", dataType)
+	}
+
+	return result, nil
+}
+
+func writeOutput(path string, result map[string]any) error {
+	if path == "" {
+		return errors.New("path tidak valid")
+	}
+
+	flags := os.O_RDWR | os.O_CREATE | os.O_TRUNC
+
+	file, err := os.OpenFile(path, flags, 0o644)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if cerr := file.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
+
+	resultByte, err := json.MarshalIndent(result, "", "    ")
+	if err != nil {
+		return err
+	}
+
+	if _, err := file.Write(resultByte); err != nil {
+		return err
+	}
+
 	return nil
 }
