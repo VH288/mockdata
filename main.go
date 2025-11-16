@@ -9,6 +9,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/VH288/mockdata/data"
 )
 
 func main() {
@@ -140,14 +142,8 @@ func readInput(path string, mapping *map[string]string) error {
 }
 
 func validatetype(mapping map[string]string) error {
-	supported := map[string]bool{
-		"name":    true,
-		"address": true,
-		"date":    true,
-		"phone":   true,
-	}
 	for _, value := range mapping {
-		if !supported[value] {
+		if !data.Supported[value] {
 			return errors.New("tipe data tidak didukung")
 		}
 	}
@@ -158,7 +154,7 @@ func generateOutput(mapping map[string]string) (map[string]any, error) {
 	result := make(map[string]any)
 
 	for key, dataType := range mapping {
-		result[key] = fmt.Sprintf("%s palsu", dataType)
+		result[key] = data.Generate(dataType)
 	}
 
 	return result, nil
