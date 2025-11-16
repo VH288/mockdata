@@ -106,7 +106,11 @@ func readInput(path string, mapping *map[string]string) error {
 		return err
 	}
 
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	fileByte, err := io.ReadAll(file)
 	if err != nil {
